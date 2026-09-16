@@ -1,1131 +1,442 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#08111f">
-<title>Expert Trader Analysis</title>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>Expert Trader — Deriv Digit Analyzer</title>
 <style>
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
-
 :root{
-  --bg:#050b14;
-  --panel:#0b1422;
-  --panel2:#0f1b2d;
-  --border:#1c2b42;
-  --text:#eaf2ff;
-  --muted:#8ea2bf;
-  --blue:#3b82f6;
-  --cyan:#06b6d4;
-  --green:#22c55e;
-  --red:#ef4444;
-  --yellow:#f59e0b;
-  --purple:#8b5cf6;
-  --shadow:0 15px 40px rgba(0,0,0,.35);
-}
-
-body{
-  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  background:
-    radial-gradient(circle at top right,rgba(59,130,246,.12),transparent 35%),
-    radial-gradient(circle at bottom left,rgba(139,92,246,.08),transparent 35%),
-    var(--bg);
-  color:var(--text);
-  min-height:100vh;
-}
-
-button,
-select,
-input{
-  font:inherit;
-}
-
-button{
-  cursor:pointer;
-}
-
-.app{
-  width:min(1450px,96%);
-  margin:20px auto 40px;
-}
-
-/* HEADER */
-
-.header{
-  background:linear-gradient(135deg,#0d1d34,#0b1525);
-  border:1px solid var(--border);
-  border-radius:20px;
-  padding:20px;
-  box-shadow:var(--shadow);
-  margin-bottom:16px;
-}
-
-.header-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:15px;
-  flex-wrap:wrap;
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:14px;
-}
-
-.logo{
-  width:50px;
-  height:50px;
-  border-radius:14px;
-  display:grid;
-  place-items:center;
-  background:linear-gradient(135deg,#2563eb,#7c3aed);
-  font-size:25px;
-  box-shadow:0 8px 25px rgba(59,130,246,.3);
-}
-
-h1{
-  font-size:clamp(20px,3vw,30px);
-  letter-spacing:-.5px;
-}
-
-.subtitle{
-  color:var(--muted);
-  font-size:13px;
-  margin-top:3px;
-}
-
-.status-area{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-.pill{
-  display:inline-flex;
-  align-items:center;
-  gap:7px;
-  padding:8px 12px;
-  border-radius:999px;
-  border:1px solid var(--border);
-  background:#0b1627;
-  color:var(--muted);
-  font-size:12px;
-  font-weight:700;
-}
-
-.dot{
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:var(--red);
-}
-
-.pill.connected{
-  color:#bbf7d0;
-  border-color:rgba(34,197,94,.35);
-}
-
-.pill.connected .dot{
-  background:var(--green);
-  box-shadow:0 0 10px var(--green);
-}
-
-.pill.warning{
-  color:#fde68a;
-  border-color:rgba(245,158,11,.35);
-}
-
-.pill.warning .dot{
-  background:var(--yellow);
-}
-
-/* CONTROLS */
-
-.controls{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:12px;
-  margin-bottom:16px;
-}
-
-.control{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:12px;
-}
-
-.control label{
-  display:block;
-  color:var(--muted);
-  font-size:11px;
-  text-transform:uppercase;
-  letter-spacing:.7px;
-  margin-bottom:7px;
-}
-
-select,
-input{
-  width:100%;
-  background:#07101d;
-  color:var(--text);
-  border:1px solid #20324d;
-  border-radius:9px;
-  padding:10px;
-  outline:none;
-}
-
-select:focus,
-input:focus{
-  border-color:var(--blue);
-}
-
-/* MARKET CARD */
-
-.market-card{
-  background:
-    linear-gradient(135deg,rgba(59,130,246,.10),transparent 55%),
-    var(--panel);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:20px;
-  margin-bottom:16px;
-  box-shadow:var(--shadow);
-}
-
-.market-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:20px;
-  flex-wrap:wrap;
-}
-
-.market-name{
-  font-size:20px;
-  font-weight:800;
-}
-
-.market-meta{
-  color:var(--muted);
-  font-size:12px;
-  margin-top:4px;
-}
-
-.price-box{
-  text-align:right;
-}
-
-.price{
-  font-size:34px;
-  font-weight:900;
-  letter-spacing:-1px;
-}
-
-.last-digit{
-  color:#60a5fa;
-  font-size:14px;
-  font-weight:800;
-}
-
-/* BUTTONS */
-
-.actions{
-  display:flex;
-  flex-wrap:wrap;
-  gap:9px;
-  margin-top:18px;
-}
-
-.btn{
-  border:1px solid var(--border);
-  background:#0d192b;
-  color:var(--text);
-  padding:10px 15px;
-  border-radius:10px;
-  font-weight:800;
-  transition:.2s;
-}
-
-.btn:hover{
-  transform:translateY(-1px);
-  border-color:#35557e;
-}
-
-.btn.primary{
-  background:linear-gradient(135deg,#2563eb,#4f46e5);
-  border-color:#4f46e5;
-}
-
-.btn.green{
-  background:linear-gradient(135deg,#16a34a,#059669);
-  border-color:#16a34a;
-}
-
-.btn.red{
-  background:linear-gradient(135deg,#dc2626,#b91c1c);
-  border-color:#dc2626;
-}
-
-.btn.active{
-  box-shadow:0 0 0 2px rgba(96,165,250,.18);
-  border-color:#60a5fa;
-}
-
-/* DIGITS */
-
-.digit-section{
-  margin-top:18px;
-}
-
-.section-title{
-  color:var(--muted);
-  font-size:11px;
-  text-transform:uppercase;
-  letter-spacing:.7px;
-  margin-bottom:9px;
-}
-
-.digits{
-  display:grid;
-  grid-template-columns:repeat(10,1fr);
-  gap:7px;
-}
-
-.digit{
-  padding:9px 4px;
-  border:1px solid #20324d;
-  background:#07101d;
-  border-radius:8px;
-  text-align:center;
-  font-weight:800;
-  color:#a9bbd4;
-  transition:.2s;
-}
-
-.digit.active{
-  background:#1d4ed8;
-  color:white;
-  border-color:#60a5fa;
-}
-
-.digit.best{
-  background:#7c3aed;
-  border-color:#a78bfa;
-  color:white;
-  box-shadow:0 0 15px rgba(139,92,246,.3);
-}
-
-/* GRID */
-
-.main-grid{
-  display:grid;
-  grid-template-columns:1.2fr .8fr;
-  gap:16px;
-}
-
-.panel{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:18px;
-  box-shadow:var(--shadow);
-}
-
-.panel h2{
-  font-size:15px;
-  margin-bottom:14px;
-}
-
-/* PROGRESS */
-
-.progress-row{
-  display:grid;
-  grid-template-columns:1fr auto;
-  gap:12px;
-  align-items:center;
-  margin-bottom:10px;
-}
-
-.progress-label{
-  color:var(--muted);
-  font-size:12px;
-}
-
-.progress{
-  height:9px;
-  border-radius:999px;
-  background:#07101d;
-  overflow:hidden;
-  border:1px solid #17273d;
-  margin-top:5px;
-}
-
-.fill{
-  height:100%;
-  width:0;
-  background:linear-gradient(90deg,#2563eb,#06b6d4);
-  transition:width .35s ease;
-}
-
-.fill.signal{
-  background:linear-gradient(90deg,#8b5cf6,#ec4899);
-}
-
-.fill.data{
-  background:linear-gradient(90deg,#16a34a,#22c55e);
-}
-
-/* ANALYSIS */
-
-.analysis-box{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:10px;
-  margin-top:15px;
-}
-
-.metric{
-  background:#07101d;
-  border:1px solid #182941;
-  border-radius:12px;
-  padding:12px;
-}
-
-.metric-label{
-  color:var(--muted);
-  font-size:11px;
-  text-transform:uppercase;
-}
-
-.metric-value{
-  font-size:21px;
-  font-weight:900;
-  margin-top:5px;
-}
-
-.signal-box{
-  margin-top:15px;
-  border:1px solid #243654;
-  border-radius:14px;
-  padding:14px;
-  background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(59,130,246,.04));
-}
-
-.signal-title{
-  color:#c4b5fd;
-  font-size:11px;
-  text-transform:uppercase;
-  font-weight:800;
-}
-
-.signal-text{
-  font-size:16px;
-  font-weight:900;
-  margin:5px 0 10px;
-}
-
-/* CHART */
-
-.chart-wrap{
-  height:310px;
-  position:relative;
-}
-
-/* LOG */
-
-.log{
-  height:220px;
-  overflow:auto;
-  background:#050b13;
-  border:1px solid #17273d;
-  border-radius:10px;
-  padding:10px;
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-  font-size:11px;
-  color:#9fb3cf;
-}
-
-.log-line{
-  padding:3px 0;
-  border-bottom:1px solid rgba(255,255,255,.025);
-}
-
-.log-ok{
-  color:#86efac;
-}
-
-.log-error{
-  color:#fca5a5;
-}
-
-.log-info{
-  color:#93c5fd;
-}
-
-/* SETTINGS */
-
-.settings{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-}
-
-.switch{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  color:var(--muted);
-  font-size:12px;
-  margin-top:10px;
-}
-
-.switch input{
-  width:auto;
-}
-
-/* STATUS */
-
-.status-message{
-  margin-top:15px;
-  padding:12px;
-  background:#07101d;
-  border:1px solid #182941;
-  border-radius:10px;
-  color:#a9bbd4;
-  font-size:12px;
-}
-
-.footer{
-  text-align:center;
-  color:#64748b;
-  font-size:11px;
-  margin-top:18px;
-}
-
-/* RESPONSIVE */
-
-@media(max-width:1050px){
-  .controls{
-    grid-template-columns:repeat(3,1fr);
-  }
-
-  .main-grid{
-    grid-template-columns:1fr;
-  }
-}
-
-@media(max-width:700px){
-  .controls{
-    grid-template-columns:1fr 1fr;
-  }
-
-  .settings{
-    grid-template-columns:1fr;
-  }
-
-  .digits{
-    gap:4px;
-  }
-
-  .digit{
-    padding:8px 2px;
-  }
-
-  .price{
-    font-size:27px;
-  }
-}
-
-@media(max-width:480px){
-  .controls{
-    grid-template-columns:1fr;
-  }
-
-  .header,
-  .market-card,
-  .panel{
-    padding:14px;
-  }
-
-  .actions .btn{
-    width:100%;
-  }
+  --pink:#df168d;--purple:#6515c9;--blue:#21c5e8;--green:#13b77d;
+  --red:#ef4444;--orange:#ff8a00;--ink:#34343f;--muted:#777b87;
+  --line:#e2e4f2;--bg:#f9fbff;--card:#fff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);
+background:linear-gradient(180deg,#fff 0%,#f7f9ff 100%);min-height:100vh}
+button,select,input{font:inherit}
+button{cursor:pointer;border:0}
+.hidden{display:none!important}
+.wrap{max-width:760px;margin:auto;padding:16px 14px 70px}
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.brand{font-size:40px;line-height:1;margin:10px 0 8px;font-weight:700;
+background:linear-gradient(90deg,#ed178f,#7a18cf);-webkit-background-clip:text;color:transparent}
+.underline{height:6px;width:155px;border-radius:9px;background:linear-gradient(90deg,#d81a92,#7016cc);margin-bottom:22px}
+.actions{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.btn{border-radius:14px;padding:12px 18px;color:white;font-weight:700;box-shadow:0 7px 18px #00000018}
+.logout{background:linear-gradient(135deg,#ff4141,#e33b48)}
+.connector{background:linear-gradient(135deg,#ef7b83,#5b6273)}
+.risk{background:linear-gradient(135deg,#10b981,#0ca678);align-self:stretch}
+.statusdot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#ef4444;margin-right:6px}
+.connected .statusdot{background:#16c784}
+.toggle{width:54px;height:30px;border-radius:20px;background:#4a21c9;padding:3px}
+.toggle span{display:block;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s}
+.toggle.off span{transform:translateX(0)}
+.toggle.on span{transform:translateX(24px)}
+.control-card{border-bottom:2px solid #e7e8f2;border-radius:0 0 24px 24px;padding:8px 0 24px}
+.grid{display:grid;grid-template-columns:1fr 1.2fr;gap:12px;margin-top:6px}
+.field label{display:block;font-size:12px;color:#8a8c99;margin:0 0 5px 4px}
+select,.input{width:100%;height:58px;background:#fff;border:2px solid #e2e4f2;border-radius:14px;padding:0 14px;color:#363742;
+box-shadow:0 4px 12px #4a39b10b;outline:none}
+select:focus,.input:focus{border-color:#a98ee7}
+.market-card{margin-top:30px;background:linear-gradient(135deg,#f5fbff,#eef2ff);padding:20px;border-radius:26px}
+.price-box{background:#fff;border-radius:20px;text-align:center;padding:24px 10px;box-shadow:0 8px 22px #5552 0.08}
+.market-name{font-size:21px;margin-bottom:14px}
+.price{font-size:36px;font-weight:800;color:#3e48be;letter-spacing:.5px;text-shadow:0 3px 10px #4e5fff22}
+.last{margin-top:10px;font-size:15px;color:#777}
+.last b{display:inline-flex;width:32px;height:32px;align-items:center;justify-content:center;border-radius:9px;background:#f0ecff;color:#5e25c9;font-size:18px}
+.start{display:block;width:min(360px,88%);margin:34px auto 26px;padding:17px;border-radius:20px;color:#fff;font-size:24px;font-weight:700;
+background:linear-gradient(100deg,#ff9200,#ff144c);box-shadow:0 12px 24px #ff345333}
+.start.running{background:linear-gradient(100deg,#0fb981,#00a8b5)}
+.panel{border-radius:24px;background:linear-gradient(135deg,#eefdff,#f1efff);padding:20px 12px;margin-top:10px}
+.mode-title{text-align:center;color:#25bddd;font-size:25px;font-weight:700;margin:0 0 18px}
+.digit-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
+.digit-btn{height:42px;background:#fff;border:2px solid #e0e2f2;border-radius:9px;color:#363743;font-weight:700;
+box-shadow:0 5px 11px #4442;transition:.15s}
+.digit-btn:hover,.digit-btn.selected{transform:translateY(-2px);border-color:#8e55e8;box-shadow:0 7px 16px #7348c433}
+.section-title{text-align:center;color:#7a4ae0;font-size:22px;margin:10px 0}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:#fff;border-radius:15px;padding:13px;text-align:center}
+.stat small{color:#888}.stat strong{display:block;font-size:20px;margin-top:4px}
+.bars{display:grid;gap:8px;margin-top:12px}
+.bar-row{display:grid;grid-template-columns:24px 1fr 46px;gap:8px;align-items:center}
+.bar{height:12px;background:#ececf6;border-radius:20px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,#17c8df,#7139d9);border-radius:20px}
+.signal-card{margin-top:18px;background:linear-gradient(135deg,#fff0f8,#f1eaff);border-radius:22px;padding:18px}
+.signal{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.signal-digit{font-size:48px;font-weight:900;color:#6719cb}
+.badge{display:inline-flex;align-items:center;padding:8px 12px;border-radius:99px;font-weight:800;font-size:13px;background:#e9fff7;color:#079669}
+.note{font-size:12px;line-height:1.45;color:#777;margin-top:10px}
+.table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px;background:#fff;border-radius:16px;overflow:hidden}
+.table th,.table td{padding:10px;border-bottom:1px solid #eee;text-align:left}
+.table th{background:#faf8ff;color:#6b40c9}
+.history{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.ball{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid #e1e2ee;font-weight:800}
+.footer{margin-top:22px;text-align:center;color:#858895;font-size:12px}
+.login{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(145deg,#fff,#f0f2ff)}
+.login-card{width:min(440px,100%);background:#fff;border-radius:28px;padding:28px;box-shadow:0 20px 60px #5040a326}
+.login-card h1{font-size:38px;margin:0 0 8px;background:linear-gradient(90deg,#e11890,#7017cc);-webkit-background-clip:text;color:transparent}
+.login-card p{color:#777}.login-card .input{margin:8px 0 12px}
+.enter{width:100%;padding:15px;border-radius:14px;background:linear-gradient(90deg,#dd188f,#6617cb);color:#fff;font-weight:800}
+.err{color:#d83a55;font-size:13px;min-height:18px}
+@media(max-width:560px){
+ .wrap{padding:10px 12px 50px}.brand{font-size:35px}.topbar{gap:8px}.actions{max-width:205px}
+ .btn{padding:11px 12px;font-size:14px}.grid{grid-template-columns:1fr 1.2fr}.market-name{font-size:19px}
+ .price{font-size:32px}.start{font-size:22px}.panel{padding:18px 10px}.stats{grid-template-columns:1fr 1fr 1fr}
 }
 </style>
 </head>
-
 <body>
 
-<div class="app">
-
-  <!-- HEADER -->
-  <header class="header">
-    <div class="header-top">
-
-      <div class="brand">
-        <div class="logo">📊</div>
-
-        <div>
-          <h1>Expert Trader Analysis</h1>
-          <div class="subtitle">
-            DERIV PRO SIGNAL SCANNER — ANALYSIS ONLY • NO AUTOMATIC TRADING
-          </div>
-        </div>
-      </div>
-
-      <div class="status-area">
-
-        <div class="pill" id="connector">
-          <span class="dot"></span>
-          <span id="connectorText">Connecting...</span>
-        </div>
-
-        <div class="pill">
-          🛡️ Risk Management
-        </div>
-
-        <button class="btn red" id="logout">
-          Disconnect
-        </button>
-
-      </div>
-    </div>
-  </header>
-
-  <!-- CONTROLS -->
-  <section class="controls">
-
-    <div class="control">
-      <label>Market</label>
-      <select id="market">
-        <option value="">Loading markets...</option>
-      </select>
-    </div>
-
-    <div class="control">
-      <label>Contract Type</label>
-      <select id="contract">
-        <option value="OVER">OVER</option>
-        <option value="UNDER">UNDER</option>
-        <option value="MATCH">MATCH</option>
-        <option value="DIFF">DIFF</option>
-        <option value="EVEN">EVEN</option>
-        <option value="ODD">ODD</option>
-      </select>
-    </div>
-
-    <div class="control">
-      <label>Duration</label>
-      <select id="duration">
-        <option value="10">10 Ticks</option>
-        <option value="25">25 Ticks</option>
-        <option value="50">50 Ticks</option>
-        <option value="100" selected>100 Ticks</option>
-        <option value="300">300 Ticks</option>
-        <option value="500">500 Ticks</option>
-        <option value="1000">1000 Ticks</option>
-      </select>
-    </div>
-
-    <div class="control">
-      <label>Analysis Sample</label>
-      <select id="sample">
-        <option value="100">100</option>
-        <option value="300">300</option>
-        <option value="500" selected>500</option>
-        <option value="1000">1000</option>
-        <option value="2000">2000</option>
-      </select>
-    </div>
-
-    <div class="control">
-      <label>Mode</label>
-      <select id="mode">
-        <option value="standard">Standard Analysis</option>
-        <option value="deep">Deep Analysis</option>
-        <option value="fast">Fast Analysis</option>
-      </select>
-    </div>
-
-  </section>
-
-  <!-- MARKET -->
-  <section class="market-card">
-
-    <div class="market-head">
-
-      <div>
-        <div class="market-name" id="marketName">
-          Waiting for market...
-        </div>
-
-        <div class="market-meta" id="marketMeta">
-          Connecting to Deriv public market data...
-        </div>
-      </div>
-
-      <div class="price-box">
-        <div class="price" id="price">--</div>
-        <div class="last-digit">
-          Last Digit: <span id="lastDigit">-</span>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="actions">
-
-      <button class="btn primary" id="start">
-        ▶ Start Analysis
-      </button>
-
-      <button class="btn" id="overDigits">
-        OVER Digits
-      </button>
-
-      <button class="btn" id="underDigits">
-        UNDER Digits
-      </button>
-
-      <button class="btn" data-contract="OVER">
-        OVER
-      </button>
-
-      <button class="btn" data-contract="UNDER">
-        UNDER
-      </button>
-
-      <button class="btn" data-contract="EVEN">
-        EVEN
-      </button>
-
-      <button class="btn" data-contract="ODD">
-        ODD
-      </button>
-
-      <button class="btn" id="start2">
-        🔄 Recalculate
-      </button>
-
-    </div>
-
-    <div class="digit-section">
-
-      <div class="section-title">
-        Recent Last Digits
-      </div>
-
-      <div class="digits" id="recentDigits">
-        <div class="digit" data-digit="0">0</div>
-        <div class="digit" data-digit="1">1</div>
-        <div class="digit" data-digit="2">2</div>
-        <div class="digit" data-digit="3">3</div>
-        <div class="digit" data-digit="4">4</div>
-        <div class="digit" data-digit="5">5</div>
-        <div class="digit" data-digit="6">6</div>
-        <div class="digit" data-digit="7">7</div>
-        <div class="digit" data-digit="8">8</div>
-        <div class="digit" data-digit="9">9</div>
-      </div>
-
-    </div>
-
-  </section>
-
-  <!-- MAIN -->
-  <main class="main-grid">
-
-    <!-- LEFT -->
-    <section class="panel">
-
-      <h2>📈 Statistical Analysis</h2>
-
-      <div class="progress-row">
-        <div>
-          <div class="progress-label">
-            Signal Quality
-          </div>
-
-          <div class="progress">
-            <div class="fill signal" id="confidenceFill"></div>
-          </div>
-        </div>
-
-        <strong id="confidencePct">0%</strong>
-      </div>
-
-      <div class="progress-row">
-        <div>
-          <div class="progress-label">
-            Data Loaded
-          </div>
-
-          <div class="progress">
-            <div class="fill data" id="dataFill"></div>
-          </div>
-        </div>
-
-        <strong id="dataPct">0%</strong>
-      </div>
-
-      <div class="analysis-box">
-
-        <div class="metric">
-          <div class="metric-label">Ticks</div>
-          <div class="metric-value" id="tickCount">0</div>
-        </div>
-
-        <div class="metric">
-          <div class="metric-label">Mode</div>
-          <div class="metric-value" id="modeText">Waiting</div>
-        </div>
-
-        <div class="metric">
-          <div class="metric-label">Pattern</div>
-          <div class="metric-value" id="pattern">--</div>
-        </div>
-
-        <div class="metric">
-          <div class="metric-label">Best Digit</div>
-          <div class="metric-value" id="bestDigit">--</div>
-        </div>
-
-        <div class="metric">
-          <div class="metric-label">Signal Score</div>
-          <div class="metric-value" id="signalConfidence">0%</div>
-        </div>
-
-        <div class="metric">
-          <div class="metric-label">Center Digit</div>
-          <div class="metric-value" id="centerDigit">--</div>
-        </div>
-
-      </div>
-
-      <div class="signal-box">
-
-        <div class="signal-title">
-          Technical Signal
-        </div>
-
-        <div class="signal-text" id="signalText">
-          Waiting for enough market data...
-        </div>
-
-        <div class="progress">
-          <div class="fill signal" id="signalFill"></div>
-        </div>
-
-      </div>
-
-      <div class="status-message" id="message">
-        Connect to Deriv and select a market to begin analysis.
-      </div>
-
-    </section>
-
-    <!-- RIGHT -->
-    <section class="panel">
-
-      <h2>📊 Digit Frequency</h2>
-
-      <div class="chart-wrap">
-        <canvas id="frequencyChart"></canvas>
-      </div>
-
-      <h2 style="margin-top:25px;">
-        🔎 Pattern Analysis
-      </h2>
-
-      <div class="chart-wrap">
-        <canvas id="patternChart"></canvas>
-      </div>
-
-    </section>
-
-  </main>
-
-  <!-- DETAILS -->
-  <section class="panel" style="margin-top:16px;">
-
-    <h2>⚙️ Analysis Settings</h2>
-
-    <div class="settings">
-
-      <div>
-        <label class="section-title">
-          Minimum Analysis Ticks
-        </label>
-
-        <input
-          id="analysisTicks"
-          type="number"
-          min="20"
-          max="2000"
-          value="100"
-        >
-      </div>
-
-      <div>
-        <label class="section-title">
-          Signal Threshold %
-        </label>
-
-        <input
-          id="threshold"
-          type="number"
-          min="50"
-          max="95"
-          value="65"
-        >
-      </div>
-
-      <div>
-        <label class="section-title">
-          Barrier / Target Digit
-        </label>
-
-        <input
-          id="barrier"
-          type="number"
-          min="0"
-          max="9"
-          value="5"
-        >
-      </div>
-
-    </div>
-
-    <label class="switch">
-      <input type="checkbox" id="auto">
-      Automatic analysis every 30 seconds
-    </label>
-
-  </section>
-
-  <!-- LOG -->
-  <section class="panel" style="margin-top:16px;">
-
-    <h2>🖥 Connection & Analysis Log</h2>
-
-    <div class="log" id="log"></div>
-
-  </section>
-
-  <div class="footer">
-    Expert Trader Analysis • Statistical analysis only • No automatic trading •
-    Technical scores are not guaranteed outcomes.
+<div id="login" class="login">
+  <div class="login-card">
+    <h1>Expert Trader</h1>
+    <p>Live Deriv market-data analyzer. No trading token is required for public tick data.</p>
+    <label>Display name</label>
+    <input id="name" class="input" placeholder="Trader">
+    <label>Deriv App ID</label>
+    <input id="appid" class="input" value="1089" inputmode="numeric">
+    <div id="loginErr" class="err"></div>
+    <button id="enter" class="enter">Enter Analyzer</button>
+    <p class="note">This app analyzes market data only. It does not place trades.</p>
   </div>
-
 </div>
 
+<main id="app" class="wrap hidden">
+  <div class="topbar">
+    <div>
+      <h1 class="brand">Expert Trader</h1>
+      <div class="underline"></div>
+    </div>
+    <div class="actions">
+      <button id="logout" class="btn logout">Logout</button>
+      <button id="connector" class="btn connector"><span class="statusdot"></span><span id="connText">Connecting</span></button>
+      <button id="risk" class="btn risk">💰 Risk Management</button>
+      <button id="power" class="toggle on" title="Auto reconnect"><span></span></button>
+    </div>
+  </div>
+
+  <section class="control-card">
+    <div class="grid">
+      <div class="field"><label>Market</label><select id="market"></select></div>
+      <div class="field"><label>Contract</label><select id="contract">
+        <option value="MATCHES">matches</option><option value="DIFFERS">differs</option>
+        <option value="OVER">over</option><option value="UNDER">under</option>
+        <option value="EVEN">even</option><option value="ODD">odd</option>
+        <option value="RISE">rise</option><option value="FALL">fall</option>
+      </select></div>
+      <div class="field"><label>Duration</label><select id="duration"><option>10</option><option>25</option><option selected>100</option><option>250</option></select></div>
+      <div class="field"><label>Analysis window</label><select id="window"><option>100</option><option>250</option><option selected>500</option><option>1000</option></select></div>
+    </div>
+  </section>
+
+  <section class="market-card">
+    <div class="price-box">
+      <div id="marketName" class="market-name">Volatility 100 (1s) Index</div>
+      <div id="price" class="price">0.0000</div>
+      <div class="last">Last digit <b id="lastDigit">—</b></div>
+    </div>
+  </section>
+
+  <button id="start" class="start">Start Analysis</button>
+
+  <section class="panel">
+    <h2 id="modeTitle" class="mode-title">Over</h2>
+
+    <div id="overBlock">
+      <h3 class="section-title">Over</h3>
+      <div id="overDigits" class="digit-grid"></div>
+      <h3 class="section-title">Under</h3>
+      <div id="underDigits" class="digit-grid"></div>
+    </div>
+
+    <div class="signal-card">
+      <div class="signal">
+        <div><small>Recommended observed digit</small><div id="signalDigit" class="signal-digit">—</div></div>
+        <div style="text-align:right"><span id="signalBadge" class="badge">Waiting</span><div id="signalText" style="font-size:13px;margin-top:7px">Collecting ticks…</div></div>
+      </div>
+      <div class="note">The digit signal is a historical-frequency heuristic from the selected window, not a guaranteed prediction or probability of the next tick.</div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h3 class="section-title">Digit Frequency</h3>
+    <div id="stats" class="stats"></div>
+    <div id="bars" class="bars"></div>
+  </section>
+
+  <section class="panel">
+    <h3 class="section-title">Recent Digits</h3>
+    <div id="history" class="history"></div>
+  </section>
+
+  <section class="panel">
+    <h3 class="section-title">Pattern Analysis</h3>
+    <table class="table">
+      <tbody id="pattern"></tbody>
+    </table>
+  </section>
+
+  <div class="footer">Public market-data mode • Auto reconnect <span id="reconnectText">ON</span></div>
+</main>
+
 <script>
+(() => {
+  const FALLBACK = [
+    ['Volatility 100 (1s) Index','1HZ100V'],
+    ['Volatility 75 (1s) Index','1HZ75V'],
+    ['Volatility 50 (1s) Index','1HZ50V'],
+    ['Volatility 25 (1s) Index','1HZ25V'],
+    ['Volatility 10 (1s) Index','1HZ10V'],
+    ['Volatility 90 (1s) Index','1HZ90V'],
+    ['Volatility 30 (1s) Index','1HZ30V'],
+    ['Volatility 15 (1s) Index','1HZ15V']
+  ];
 
-/* =========================================================
-   DERIV EXPERT TRADER ANALYSIS
-   ANALYSIS ONLY — NO AUTOMATIC TRADING
-   ========================================================= */
+  const S = {
+    ws:null, appId:'1089', symbol:'1HZ100V', name:'Trader', pipSize:0.01,
+    prices:[], times:[], digits:[], running:false, auto:true, reconnectTimer:null,
+    req:0, selectedDigit:null, symbols:[]
+  };
 
-"use strict";
+  const $ = id => document.getElementById(id);
+  const req = () => ++S.req;
 
-
-/* =========================================================
-   CONFIG
-   ========================================================= */
-
-const WS_URL =
-  "wss://api.derivws.com/trading/v1/options/ws/public";
-
-
-/* =========================================================
-   STATE
-   ========================================================= */
-
-const S = {
-
-  ws: null,
-
-  connected: false,
-
-  manuallyDisconnected: false,
-
-  reconnectTimer: null,
-
-  reconnectAttempts: 0,
-
-  requestId: 1000,
-
-  subscriptionId: null,
-
-  symbol: "",
-
-  pip: 0.01,
-
-  markets: [],
-
-  ticks: [],
-
-  charts: {
-    frequency: null,
-    pattern: null
-  },
-
-  contract: "OVER",
-
-  barrier: 5,
-
-  analysisTimer: null,
-
-  lastAnalysis: null
-
-};
-
-
-/* =========================================================
-   DOM
-   ========================================================= */
-
-const $ = id => document.getElementById(id);
-
-
-/* =========================================================
-   LOGGING
-   ========================================================= */
-
-function log(message, type = "info") {
-
-  const box = $("log");
-
-  if (!box) return;
-
-  const row = document.createElement("div");
-
-  row.className = "log-line log-" + type;
-
-  const time = new Date().toLocaleTimeString();
-
-  row.textContent = `[${time}] ${message}`;
-
-  box.appendChild(row);
-
-  while (box.children.length > 250) {
-    box.removeChild(box.firstChild);
+  function setConn(ok, text){
+    $('connector').classList.toggle('connected', ok);
+    $('connText').textContent = text;
   }
 
-  box.scrollTop = box.scrollHeight;
-
-  console.log(`[${time}] ${message}`);
-}
-
-
-/* =========================================================
-   STATUS
-   ========================================================= */
-
-function setConnectionStatus(
-  text,
-  connected = false,
-  warning = false
-) {
-
-  const pill = $("connector");
-  const label = $("connectorText");
-
-  if (!pill || !label) return;
-
-  label.textContent = text;
-
-  pill.classList.remove("connected", "warning");
-
-  if (connected) {
-    pill.classList.add("connected");
+  function send(obj){
+    if(S.ws && S.ws.readyState===WebSocket.OPEN) S.ws.send(JSON.stringify(obj));
   }
 
-  if (warning) {
-    pill.classList.add("warning");
+  function decimalsFromPip(pip){
+    const n = Number(pip);
+    if(!n || !isFinite(n)) return 2;
+    const d = Math.max(0, Math.min(10, Math.round(-Math.log10(n))));
+    return d;
   }
-}
 
+  function priceText(price){
+    const d = decimalsFromPip(S.pipSize);
+    return Number(price).toFixed(d);
+  }
 
-/* =========================================================
-   REQUEST IDs
-   ========================================================= */
+  function lastDigit(price){
+    const d = decimalsFromPip(S.pipSize);
+    const n = Math.round(Math.abs(Number(price)) * Math.pow(10,d));
+    return n % 10;
+  }
 
-function req() {
-  return ++S.requestId;
-}
+  function connect(){
+    clearTimeout(S.reconnectTimer);
+    setConn(false,'Connecting');
+    const url = 'wss://ws.derivws.com/websockets/v3?app_id=' + encodeURIComponent(S.appId || '1089');
+    try { S.ws = new WebSocket(url); }
+    catch(e){ setConn(false,'Connection error'); scheduleReconnect(); return; }
 
+    S.ws.onopen = () => {
+      setConn(true,'Connected');
+      send({active_symbols:'brief', req_id:req()});
+      loadHistory();
+      if(S.running) subscribeTicks();
+    };
+    S.ws.onmessage = e => {
+      let d; try { d=JSON.parse(e.data); } catch(_){ return; }
+      if(d.error){ setConn(false, d.error.message || 'API error'); return; }
+      if(d.msg_type==='active_symbols') handleSymbols(d.active_symbols || []);
+      if(d.msg_type==='history') handleHistory(d);
+      if(d.msg_type==='tick') handleTick(d.tick);
+    };
+    S.ws.onerror = () => setConn(false,'Connection error');
+    S.ws.onclose = () => { setConn(false,'Disconnected'); if(S.auto) scheduleReconnect(); };
+  }
 
-/* =========================================================
-   SAFE NUMBER
-   ========================================================= */
+  function scheduleReconnect(){
+    if(!S.auto) return;
+    clearTimeout(S.reconnectTimer);
+    S.reconnectTimer=setTimeout(connect,2500);
+  }
 
-function number(value, fallback = 0) {
+  function handleSymbols(list){
+    S.symbols = list;
+    const normalized = list.map(x => ({
+      symbol:x.underlying_symbol || x.symbol,
+      name:x.underlying_symbol_name || x.display_name || x.underlying_symbol || x.symbol,
+      pip:Number(x.pip_size ?? x.pip ?? 0.01),
+      market:x.market || ''
+    })).filter(x=>x.symbol);
+    const preferred = normalized.filter(x =>
+      /volatility/i.test(x.name) || /1HZ/i.test(x.symbol)
+    );
+    const all = preferred.length ? preferred : normalized;
+    const seen = new Set();
+    const options = all.filter(x=>!seen.has(x.symbol) && seen.add(x.symbol)).slice(0,80);
+    if(!options.length) return;
+    const select=$('market');
+    select.innerHTML='';
+    options.forEach(x=>{
+      const o=document.createElement('option');
+      o.value=x.symbol; o.textContent=x.name;
+      o.dataset.pip=x.pip;
+      select.appendChild(o);
+    });
+    const idx=options.findIndex(x=>x.symbol===S.symbol);
+    select.selectedIndex=idx>=0?idx:0;
+    const chosen=options[select.selectedIndex];
+    if(chosen) applyMarket(chosen.symbol,chosen.name,chosen.pip);
+  }
 
-  const n = Number(value);
+  function fillFallback(){
+    const select=$('market'); select.innerHTML='';
+    FALLBACK.forEach(([name,symbol])=>{
+      const o=document.createElement('option'); o.value=symbol; o.textContent=name; select.appendChild(o);
+    });
+    select.value=S.symbol;
+  }
 
-  return Number.isFinite(n) ? n : fallback;
-}
+  function loadHistory(){
+    send({ticks_history:S.symbol,count:Number($('window').value),end:'latest',style:'ticks',subscribe:0,req_id:req()});
+  }
 
+  function subscribeTicks(){
+    send({forget_all:'ticks', req_id:req()});
+    send({ticks:S.symbol,subscribe:1,req_id:req()});
+  }
 
-/* =========================================================
-   CLAMP
-   ========================================================= */
+  function handleHistory(d){
+    const prices = d.history?.prices || [];
+    const times = d.history?.times || [];
+    S.pipSize = Number(d.pip_size || S.pipSize);
+    S.prices = prices.map(Number).filter(Number.isFinite);
+    S.times = times.slice(-S.prices.length);
+    S.digits = S.prices.map(lastDigit);
+    if(S.prices.length){
+      const p=S.prices[S.prices.length-1];
+      $('price').textContent=priceText(p);
+      $('lastDigit').textContent=lastDigit(p);
+    }
+    render();
+  }
 
-function clamp(value, min, max) {
+  function handleTick(t){
+    if(!t || t.symbol!==S.symbol) return;
+    const p=Number(t.quote); if(!Number.isFinite(p)) return;
+    if(t.pip_size) S.pipSize=Number(t.pip_size);
+    S.prices.push(p); S.times.push(Number(t.epoch)||Date.now()/1000); S.digits.push(lastDigit(p));
+    const max=Number($('window').value);
+    if(S.prices.length>max){S.prices.splice(0,S.prices.length-max);S.times.splice(0,S.times.length-max);S.digits.splice(0,S.digits.length-max)}
+    $('price').textContent=priceText(p);
+    $('lastDigit').textContent=lastDigit(p);
+    render();
+  }
 
-  return Math.max(
-    min,
-    Math.min(max, value)
-  );
-}
+  function counts(){
+    const c=Array(10).fill(0);
+    S.digits.forEach(d=>{if(d>=0&&d<=9)c[d]++});
+    return c;
+  }
 
+  function renderDigits(){
+    const over=$('overDigits'), under=$('underDigits');
+    over.innerHTML=''; under.innerHTML='';
+    for(let d=0;d<10;d++){
+      [over,under].forEach(box=>{
+        const b=document.createElement('button');
+        b.className='digit-btn'+(S.selectedDigit===d?' selected':'');
+        b.textContent=d;
+        b.onclick=()=>{S.selectedDigit=d;renderDigits();renderSignal()};
+        box.appendChild(b);
+      });
+    }
+  }
 
-/* =========================================================
-   SYMBOL HELPERS
-   ========================================================= */
+  function renderSignal(){
+    const c=counts(), total=S.digits.length;
+    if(!total){$('signalDigit').textContent='—';$('signalBadge').textContent='Waiting';$('signalText').textContent='Collecting ticks…';return}
+    let max=Math.max(...c), digit=c.indexOf(max), share=max/total*100;
+    $('signalDigit').textContent=digit;
+    $('signalBadge').textContent=share.toFixed(1)+'% observed';
+    $('signalText').textContent=`Digit ${digit} occurred ${max} of ${total} ticks`;
+    if(S.selectedDigit!==null) $('modeTitle').textContent=$('contract').value.replace('_',' ')+' • '+S.selectedDigit;
+  }
 
-function symbolOf(item) {
+  function renderStats(){
+    const c=counts(), total=S.digits.length;
+    $('stats').innerHTML=`
+      <div class="stat"><small>Samples</small><strong>${total}</strong></div>
+      <div class="stat"><small>Most frequent</small><strong>${total?c.indexOf(Math.max(...c)):'—'}</strong></div>
+      <div class="stat"><small>Least frequent</small><strong>${total?c.indexOf(Math.min(...c)):'—'}</strong></div>`;
+    const max=Math.max(1,...c);
+    $('bars').innerHTML=c.map((n,d)=>`<div class="bar-row"><b>${d}</b><div class="bar"><div class="fill" style="width:${n/max*100}%"></div></div><span>${n}</span></div>`).join('');
+  }
 
-  return (
-    item?.underlying_symbol ||
-    item?.symbol ||
-    ""
-  );
-}
+  function longestStreak(arr){
+    if(!arr.length)return 0;
+    let best=1,cur=1;
+    for(let i=1;i<arr.length;i++){if(arr[i]===arr[i-1]){cur++;best=Math.max(best,cur)}else cur=1}
+    return best;
+  }
 
+  function renderPattern(){
+    const c=counts(), total=S.digits.length;
+    let even=0,odd=0,rise=0,fall=0;
+    for(let i=0;i<S.digits.length;i++){
+      S.digits[i]%2===0?even++:odd++;
+      if(i){S.prices[i]>S.prices[i-1]?rise++:S.prices[i]<S.prices[i-1]?fall++:0}
+    }
+    $('pattern').innerHTML=[
+      ['Samples',total],
+      ['Even / Odd',`${even} / ${odd}`],
+      ['Rise / Fall ticks',`${rise} / ${fall}`],
+      ['Longest same-digit streak',longestStreak(S.digits)],
+      ['Most frequent digit',total?c.indexOf(Math.max(...c)):'—'],
+      ['Most frequent share',total?(Math.max(...c)/total*100).toFixed(2)+'%':'—']
+    ].map(r=>`<tr><th>${r[0]}</th><td>${r[1]}</td></tr>`).join('');
+  }
 
-function nameOf(item) {
+  function renderHistory(){
+    $('history').innerHTML=S.digits.slice(-50).map(d=>`<span class="ball">${d}</span>`).join('');
+  }
 
-  return (
-    item?.underlying_symbol_name ||
-    item?.display_name ||
-    symbolOf(item)
-  );
-}
+  function render(){
+    renderDigits(); renderSignal(); renderStats(); renderPattern(); renderHistory();
+  }
 
+  function applyMarket(symbol,name,pip){
+    S.symbol=symbol; S.pipSize=Number(pip)||0.01;
+    $('marketName').textContent=name || symbol;
+    if(S.ws?.readyState===WebSocket.OPEN && S.running){loadHistory();subscribeTicks()}
+    else if(S.ws?.readyState===WebSocket.OPEN) loadHistory();
+    S.prices=[];S.times=[];S.digits=[];render();
+  }
 
-function pipOf(item) {
+  $('enter').onclick=()=>{
+    S.name=$('name').value.trim()||'Trader';
+    const app=$('appid').value.trim()||'1089';
+    if(!/^\d+$/.test(app)){ $('loginErr').textContent='App ID should contain numbers only.'; return; }
+    S.appId=app;
+    $('login').classList.add('hidden'); $('app').classList.remove('hidden');
+    fillFallback(); connect();
+  };
 
-  const p = Number(
-    item?.pip_size ??
-    item?.pip ??
-    0.01
-  );
+  $('logout').onclick=()=>{
+    S.running=false;
+    if(S.ws){try{S.ws.close()}catch(_){}}
+    $('app').classList.add('hidden');$('login').classList.remove('hidden');
+  };
 
-  return p > 0 ? p : 0.01;
-}
+  $('start').onclick=()=>{
+    S.running=!S.running;
+    $('start').textContent=S.running?'Stop Analysis':'Start Analysis';
+    $('start').classList.toggle('running',S.running);
+    if(S.running){loadHistory();subscribeTicks()}else send({forget_all:'ticks',req_id:req()});
+  };
 
-
-/* =========================================================
+  $('market').onchange=()=>{
+    const o=$('market').selectedOptions[0];
+    applyMarket(o.value,o.textContent,Number(o.dataset.pip)||0.01);
+  };
+  $('window').onchange=()=>{if(S.ws?.readyState===WebSocket.OPEN)loadHistory()};
+  $('contract').onchange=()=>{$('modeTitle').textContent=$('contract').value.replace('_',' ');renderSignal()};
+  $('power').onclick=
