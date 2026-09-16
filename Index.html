@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#08111f">
+<title>Expert Trader Analysis</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+:root{
+  --bg:#050b14;
+  --panel:#0b1422;
+  --panel2:#0f1b2d;
+  --border:#1c2b42;
+  --text:#eaf2ff;
+  --muted:#8ea2bf;
+  --blue:#3b82f6;
+  --cyan:#06b6d4;
+  --green:#22c55e;
+  --red:#ef4444;
+  --yellow:#f59e0b;
+  --purple:#8b5cf6;
+  --shadow:0 15px 40px rgba(0,0,0,.35);
+}
+
+body{
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:
+    radial-gradient(circle at top right,rgba(59,130,246,.12),transparent 35%),
+    radial-gradient(circle at bottom left,rgba(139,92,246,.08),transparent 35%),
+    var(--bg);
+  color:var(--text);
+  min-height:100vh;
+}
+
+button,
+select,
+input{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+.app{
+  width:min(1450px,96%);
+  margin:20px auto 40px;
+}
+
+/* HEADER */
+
+.header{
+  background:linear-gradient(135deg,#0d1d34,#0b1525);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:20px;
+  box-shadow:var(--shadow);
+  margin-bottom:16px;
+}
+
+.header-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  flex-wrap:wrap;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.logo{
+  width:50px;
+  height:50px;
+  border-radius:14px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,#2563eb,#7c3aed);
+  font-size:25px;
+  box-shadow:0 8px 25px rgba(59,130,246,.3);
+}
+
+h1{
+  font-size:clamp(20px,3vw,30px);
+  letter-spacing:-.5px;
+}
+
+.subtitle{
+  color:var(--muted);
+  font-size:13px;
+  margin-top:3px;
+}
+
+.status-area{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.pill{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:#0b1627;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:700;
+}
+
+.dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--red);
+}
+
+.pill.connected{
+  color:#bbf7d0;
+  border-color:rgba(34,197,94,.35);
+}
+
+.pill.connected .dot{
+  background:var(--green);
+  box-shadow:0 0 10px var(--green);
+}
+
+.pill.warning{
+  color:#fde68a;
+  border-color:rgba(245,158,11,.35);
+}
+
+.pill.warning .dot{
+  background:var(--yellow);
+}
+
+/* CONTROLS */
+
+.controls{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:12px;
+  margin-bottom:16px;
+}
+
+.control{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px;
+}
+
+.control label{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.7px;
+  margin-bottom:7px;
+}
+
+select,
+input{
+  width:100%;
+  background:#07101d;
+  color:var(--text);
+  border:1px solid #20324d;
+  border-radius:9px;
+  padding:10px;
+  outline:none;
+}
+
+select:focus,
+input:focus{
+  border-color:var(--blue);
+}
+
+/* MARKET CARD */
+
+.market-card{
+  background:
+    linear-gradient(135deg,rgba(59,130,246,.10),transparent 55%),
+    var(--panel);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:20px;
+  margin-bottom:16px;
+  box-shadow:var(--shadow);
+}
+
+.market-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:20px;
+  flex-wrap:wrap;
+}
+
+.market-name{
+  font-size:20px;
+  font-weight:800;
+}
+
+.market-meta{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:4px;
+}
+
+.price-box{
+  text-align:right;
+}
+
+.price{
+  font-size:34px;
+  font-weight:900;
+  letter-spacing:-1px;
+}
+
+.last-digit{
+  color:#60a5fa;
+  font-size:14px;
+  font-weight:800;
+}
+
+/* BUTTONS */
+
+.actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+  margin-top:18px;
+}
+
+.btn{
+  border:1px solid var(--border);
+  background:#0d192b;
+  color:var(--text);
+  padding:10px 15px;
+  border-radius:10px;
+  font-weight:800;
+  transition:.2s;
+}
+
+.btn:hover{
+  transform:translateY(-1px);
+  border-color:#35557e;
+}
+
+.btn.primary{
+  background:linear-gradient(135deg,#2563eb,#4f46e5);
+  border-color:#4f46e5;
+}
+
+.btn.green{
+  background:linear-gradient(135deg,#16a34a,#059669);
+  border-color:#16a34a;
+}
+
+.btn.red{
+  background:linear-gradient(135deg,#dc2626,#b91c1c);
+  border-color:#dc2626;
+}
+
+.btn.active{
+  box-shadow:0 0 0 2px rgba(96,165,250,.18);
+  border-color:#60a5fa;
+}
+
+/* DIGITS */
+
+.digit-section{
+  margin-top:18px;
+}
+
+.section-title{
+  color:var(--muted);
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.7px;
+  margin-bottom:9px;
+}
+
+.digits{
+  display:grid;
+  grid-template-columns:repeat(10,1fr);
+  gap:7px;
+}
+
+.digit{
+  padding:9px 4px;
+  border:1px solid #20324d;
+  background:#07101d;
+  border-radius:8px;
+  text-align:center;
+  font-weight:800;
+  color:#a9bbd4;
+  transition:.2s;
+}
+
+.digit.active{
+  background:#1d4ed8;
+  color:white;
+  border-color:#60a5fa;
+}
+
+.digit.best{
+  background:#7c3aed;
+  border-color:#a78bfa;
+  color:white;
+  box-shadow:0 0 15px rgba(139,92,246,.3);
+}
+
+/* GRID */
+
+.main-grid{
+  display:grid;
+  grid-template-columns:1.2fr .8fr;
+  gap:16px;
+}
+
+.panel{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:18px;
+  box-shadow:var(--shadow);
+}
+
+.panel h2{
+  font-size:15px;
+  margin-bottom:14px;
+}
+
+/* PROGRESS */
+
+.progress-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:12px;
+  align-items:center;
+  margin-bottom:10px;
+}
+
+.progress-label{
+  color:var(--muted);
+  font-size:12px;
+}
+
+.progress{
+  height:9px;
+  border-radius:999px;
+  background:#07101d;
+  overflow:hidden;
+  border:1px solid #17273d;
+  margin-top:5px;
+}
+
+.fill{
+  height:100%;
+  width:0;
+  background:linear-gradient(90deg,#2563eb,#06b6d4);
+  transition:width .35s ease;
+}
+
+.fill.signal{
+  background:linear-gradient(90deg,#8b5cf6,#ec4899);
+}
+
+.fill.data{
+  background:linear-gradient(90deg,#16a34a,#22c55e);
+}
+
+/* ANALYSIS */
+
+.analysis-box{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  margin-top:15px;
+}
+
+.metric{
+  background:#07101d;
+  border:1px solid #182941;
+  border-radius:12px;
+  padding:12px;
+}
+
+.metric-label{
+  color:var(--muted);
+  font-size:11px;
+  text-transform:uppercase;
+}
+
+.metric-value{
+  font-size:21px;
+  font-weight:900;
+  margin-top:5px;
+}
+
+.signal-box{
+  margin-top:15px;
+  border:1px solid #243654;
+  border-radius:14px;
+  padding:14px;
+  background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(59,130,246,.04));
+}
+
+.signal-title{
+  color:#c4b5fd;
+  font-size:11px;
+  text-transform:uppercase;
+  font-weight:800;
+}
+
+.signal-text{
+  font-size:16px;
+  font-weight:900;
+  margin:5px 0 10px;
+}
+
+/* CHART */
+
+.chart-wrap{
+  height:310px;
+  position:relative;
+}
+
+/* LOG */
+
+.log{
+  height:220px;
+  overflow:auto;
+  background:#050b13;
+  border:1px solid #17273d;
+  border-radius:10px;
+  padding:10px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:11px;
+  color:#9fb3cf;
+}
+
+.log-line{
+  padding:3px 0;
+  border-bottom:1px solid rgba(255,255,255,.025);
+}
+
+.log-ok{
+  color:#86efac;
+}
+
+.log-error{
+  color:#fca5a5;
+}
+
+.log-info{
+  color:#93c5fd;
+}
+
+/* SETTINGS */
+
+.settings{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+
+.switch{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:var(--muted);
+  font-size:12px;
+  margin-top:10px;
+}
+
+.switch input{
+  width:auto;
+}
+
+/* STATUS */
+
+.status-message{
+  margin-top:15px;
+  padding:12px;
+  background:#07101d;
+  border:1px solid #182941;
+  border-radius:10px;
+  color:#a9bbd4;
+  font-size:12px;
+}
+
+.footer{
+  text-align:center;
+  color:#64748b;
+  font-size:11px;
+  margin-top:18px;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:1050px){
+  .controls{
+    grid-template-columns:repeat(3,1fr);
+  }
+
+  .main-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:700px){
+  .controls{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .settings{
+    grid-template-columns:1fr;
+  }
+
+  .digits{
+    gap:4px;
+  }
+
+  .digit{
+    padding:8px 2px;
+  }
+
+  .price{
+    font-size:27px;
+  }
+}
+
+@media(max-width:480px){
+  .controls{
+    grid-template-columns:1fr;
+  }
+
+  .header,
+  .market-card,
+  .panel{
+    padding:14px;
+  }
+
+  .actions .btn{
+    width:100%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-top">
+
+      <div class="brand">
+        <div class="logo">📊</div>
+
+        <div>
+          <h1>Expert Trader Analysis</h1>
+          <div class="subtitle">
+            DERIV PRO SIGNAL SCANNER — ANALYSIS ONLY • NO AUTOMATIC TRADING
+          </div>
+        </div>
+      </div>
+
+      <div class="status-area">
+
+        <div class="pill" id="connector">
+          <span class="dot"></span>
+          <span id="connectorText">Connecting...</span>
+        </div>
+
+        <div class="pill">
+          🛡️ Risk Management
+        </div>
+
+        <button class="btn red" id="logout">
+          Disconnect
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTROLS -->
+  <section class="controls">
+
+    <div class="control">
+      <label>Market</label>
+      <select id="market">
+        <option value="">Loading markets...</option>
+      </select>
+    </div>
+
+    <div class="control">
+      <label>Contract Type</label>
+      <select id="contract">
+        <option value="OVER">OVER</option>
+        <option value="UNDER">UNDER</option>
+        <option value="MATCH">MATCH</option>
+        <option value="DIFF">DIFF</option>
+        <option value="EVEN">EVEN</option>
+        <option value="ODD">ODD</option>
+      </select>
+    </div>
+
+    <div class="control">
+      <label>Duration</label>
+      <select id="duration">
+        <option value="10">10 Ticks</option>
+        <option value="25">25 Ticks</option>
+        <option value="50">50 Ticks</option>
+        <option value="100" selected>100 Ticks</option>
+        <option value="300">300 Ticks</option>
+        <option value="500">500 Ticks</option>
+        <option value="1000">1000 Ticks</option>
+      </select>
+    </div>
+
+    <div class="control">
+      <label>Analysis Sample</label>
+      <select id="sample">
+        <option value="100">100</option>
+        <option value="300">300</option>
+        <option value="500" selected>500</option>
+        <option value="1000">1000</option>
+        <option value="2000">2000</option>
+      </select>
+    </div>
+
+    <div class="control">
+      <label>Mode</label>
+      <select id="mode">
+        <option value="standard">Standard Analysis</option>
+        <option value="deep">Deep Analysis</option>
+        <option value="fast">Fast Analysis</option>
+      </select>
+    </div>
+
+  </section>
+
+  <!-- MARKET -->
+  <section class="market-card">
+
+    <div class="market-head">
+
+      <div>
+        <div class="market-name" id="marketName">
+          Waiting for market...
+        </div>
+
+        <div class="market-meta" id="marketMeta">
+          Connecting to Deriv public market data...
+        </div>
+      </div>
+
+      <div class="price-box">
+        <div class="price" id="price">--</div>
+        <div class="last-digit">
+          Last Digit: <span id="lastDigit">-</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="actions">
+
+      <button class="btn primary" id="start">
+        ▶ Start Analysis
+      </button>
+
+      <button class="btn" id="overDigits">
+        OVER Digits
+      </button>
+
+      <button class="btn" id="underDigits">
+        UNDER Digits
+      </button>
+
+      <button class="btn" data-contract="OVER">
+        OVER
+      </button>
+
+      <button class="btn" data-contract="UNDER">
+        UNDER
+      </button>
+
+      <button class="btn" data-contract="EVEN">
+        EVEN
+      </button>
+
+      <button class="btn" data-contract="ODD">
+        ODD
+      </button>
+
+      <button class="btn" id="start2">
+        🔄 Recalculate
+      </button>
+
+    </div>
+
+    <div class="digit-section">
+
+      <div class="section-title">
+        Recent Last Digits
+      </div>
+
+      <div class="digits" id="recentDigits">
+        <div class="digit" data-digit="0">0</div>
+        <div class="digit" data-digit="1">1</div>
+        <div class="digit" data-digit="2">2</div>
+        <div class="digit" data-digit="3">3</div>
+        <div class="digit" data-digit="4">4</div>
+        <div class="digit" data-digit="5">5</div>
+        <div class="digit" data-digit="6">6</div>
+        <div class="digit" data-digit="7">7</div>
+        <div class="digit" data-digit="8">8</div>
+        <div class="digit" data-digit="9">9</div>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- MAIN -->
+  <main class="main-grid">
+
+    <!-- LEFT -->
+    <section class="panel">
+
+      <h2>📈 Statistical Analysis</h2>
+
+      <div class="progress-row">
+        <div>
+          <div class="progress-label">
+            Signal Quality
+          </div>
+
+          <div class="progress">
+            <div class="fill signal" id="confidenceFill"></div>
+          </div>
+        </div>
+
+        <strong id="confidencePct">0%</strong>
+      </div>
+
+      <div class="progress-row">
+        <div>
+          <div class="progress-label">
+            Data Loaded
+          </div>
+
+          <div class="progress">
+            <div class="fill data" id="dataFill"></div>
+          </div>
+        </div>
+
+        <strong id="dataPct">0%</strong>
+      </div>
+
+      <div class="analysis-box">
+
+        <div class="metric">
+          <div class="metric-label">Ticks</div>
+          <div class="metric-value" id="tickCount">0</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">Mode</div>
+          <div class="metric-value" id="modeText">Waiting</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">Pattern</div>
+          <div class="metric-value" id="pattern">--</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">Best Digit</div>
+          <div class="metric-value" id="bestDigit">--</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">Signal Score</div>
+          <div class="metric-value" id="signalConfidence">0%</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">Center Digit</div>
+          <div class="metric-value" id="centerDigit">--</div>
+        </div>
+
+      </div>
+
+      <div class="signal-box">
+
+        <div class="signal-title">
+          Technical Signal
+        </div>
+
+        <div class="signal-text" id="signalText">
+          Waiting for enough market data...
+        </div>
+
+        <div class="progress">
+          <div class="fill signal" id="signalFill"></div>
+        </div>
+
+      </div>
+
+      <div class="status-message" id="message">
+        Connect to Deriv and select a market to begin analysis.
+      </div>
+
+    </section>
+
+    <!-- RIGHT -->
+    <section class="panel">
+
+      <h2>📊 Digit Frequency</h2>
+
+      <div class="chart-wrap">
+        <canvas id="frequencyChart"></canvas>
+      </div>
+
+      <h2 style="margin-top:25px;">
+        🔎 Pattern Analysis
+      </h2>
+
+      <div class="chart-wrap">
+        <canvas id="patternChart"></canvas>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- DETAILS -->
+  <section class="panel" style="margin-top:16px;">
+
+    <h2>⚙️ Analysis Settings</h2>
+
+    <div class="settings">
+
+      <div>
+        <label class="section-title">
+          Minimum Analysis Ticks
+        </label>
+
+        <input
+          id="analysisTicks"
+          type="number"
+          min="20"
+          max="2000"
+          value="100"
+        >
+      </div>
+
+      <div>
+        <label class="section-title">
+          Signal Threshold %
+        </label>
+
+        <input
+          id="threshold"
+          type="number"
+          min="50"
+          max="95"
+          value="65"
+        >
+      </div>
+
+      <div>
+        <label class="section-title">
+          Barrier / Target Digit
+        </label>
+
+        <input
+          id="barrier"
+          type="number"
+          min="0"
+          max="9"
+          value="5"
+        >
+      </div>
+
+    </div>
+
+    <label class="switch">
+      <input type="checkbox" id="auto">
+      Automatic analysis every 30 seconds
+    </label>
+
+  </section>
+
+  <!-- LOG -->
+  <section class="panel" style="margin-top:16px;">
+
+    <h2>🖥 Connection & Analysis Log</h2>
+
+    <div class="log" id="log"></div>
+
+  </section>
+
+  <div class="footer">
+    Expert Trader Analysis • Statistical analysis only • No automatic trading •
+    Technical scores are not guaranteed outcomes.
+  </div>
+
+</div>
+
+<script>
+
+/* =========================================================
+   DERIV EXPERT TRADER ANALYSIS
+   ANALYSIS ONLY — NO AUTOMATIC TRADING
+   ========================================================= */
+
+"use strict";
+
+
+/* =========================================================
+   CONFIG
+   ========================================================= */
+
+const WS_URL =
+  "wss://api.derivws.com/trading/v1/options/ws/public";
+
+
+/* =========================================================
+   STATE
+   ========================================================= */
+
+const S = {
+
+  ws: null,
+
+  connected: false,
+
+  manuallyDisconnected: false,
+
+  reconnectTimer: null,
+
+  reconnectAttempts: 0,
+
+  requestId: 1000,
+
+  subscriptionId: null,
+
+  symbol: "",
+
+  pip: 0.01,
+
+  markets: [],
+
+  ticks: [],
+
+  charts: {
+    frequency: null,
+    pattern: null
+  },
+
+  contract: "OVER",
+
+  barrier: 5,
+
+  analysisTimer: null,
+
+  lastAnalysis: null
+
+};
+
+
+/* =========================================================
+   DOM
+   ========================================================= */
+
+const $ = id => document.getElementById(id);
+
+
+/* =========================================================
+   LOGGING
+   ========================================================= */
+
+function log(message, type = "info") {
+
+  const box = $("log");
+
+  if (!box) return;
+
+  const row = document.createElement("div");
+
+  row.className = "log-line log-" + type;
+
+  const time = new Date().toLocaleTimeString();
+
+  row.textContent = `[${time}] ${message}`;
+
+  box.appendChild(row);
+
+  while (box.children.length > 250) {
+    box.removeChild(box.firstChild);
+  }
+
+  box.scrollTop = box.scrollHeight;
+
+  console.log(`[${time}] ${message}`);
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+function setConnectionStatus(
+  text,
+  connected = false,
+  warning = false
+) {
+
+  const pill = $("connector");
+  const label = $("connectorText");
+
+  if (!pill || !label) return;
+
+  label.textContent = text;
+
+  pill.classList.remove("connected", "warning");
+
+  if (connected) {
+    pill.classList.add("connected");
+  }
+
+  if (warning) {
+    pill.classList.add("warning");
+  }
+}
+
+
+/* =========================================================
+   REQUEST IDs
+   ========================================================= */
+
+function req() {
+  return ++S.requestId;
+}
+
+
+/* =========================================================
+   SAFE NUMBER
+   ========================================================= */
+
+function number(value, fallback = 0) {
+
+  const n = Number(value);
+
+  return Number.isFinite(n) ? n : fallback;
+}
+
+
+/* =========================================================
+   CLAMP
+   ========================================================= */
+
+function clamp(value, min, max) {
+
+  return Math.max(
+    min,
+    Math.min(max, value)
+  );
+}
+
+
+/* =========================================================
+   SYMBOL HELPERS
+   ========================================================= */
+
+function symbolOf(item) {
+
+  return (
+    item?.underlying_symbol ||
+    item?.symbol ||
+    ""
+  );
+}
+
+
+function nameOf(item) {
+
+  return (
+    item?.underlying_symbol_name ||
+    item?.display_name ||
+    symbolOf(item)
+  );
+}
+
+
+function pipOf(item) {
+
+  const p = Number(
+    item?.pip_size ??
+    item?.pip ??
+    0.01
+  );
+
+  return p > 0 ? p : 0.01;
+}
+
+
+/* =========================================================
