@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#050914">
+<title>DERIV PRO ANALYSIS TERMINAL</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root{
+  --bg:#050914;
+  --panel:#0a1120;
+  --panel2:#0e1728;
+  --line:#1b2a40;
+  --text:#edf5ff;
+  --muted:#8496af;
+  --blue:#3b82f6;
+  --cyan:#06b6d4;
+  --green:#22c55e;
+  --red:#ef4444;
+  --yellow:#f59e0b;
+  --purple:#8b5cf6;
+  --pink:#ec4899;
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body{
+  min-height:100vh;
+  color:var(--text);
+  background:
+    radial-gradient(
+      circle at 90% 0%,
+      rgba(59,130,246,.12),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 0% 100%,
+      rgba(139,92,246,.08),
+      transparent 30%
+    ),
+    var(--bg);
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+button,
+select,
+input{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+.app{
+  width:min(1500px,96%);
+  margin:14px auto 35px;
+}
+
+/* HEADER */
+
+.header{
+  border:1px solid var(--line);
+  background:linear-gradient(
+    135deg,
+    #0b1830,
+    #08101d
+  );
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:12px;
+}
+
+.header-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.logo{
+  width:46px;
+  height:46px;
+  display:grid;
+  place-items:center;
+  border-radius:13px;
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb,
+      #7c3aed
+    );
+  font-size:22px;
+}
+
+h1{
+  font-size:clamp(18px,3vw,28px);
+}
+
+.subtitle{
+  color:var(--muted);
+  font-size:11px;
+  margin-top:3px;
+}
+
+.statuses{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex-wrap:wrap;
+}
+
+.pill{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  border:1px solid var(--line);
+  background:#091322;
+  padding:7px 10px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:800;
+  color:var(--muted);
+}
+
+.dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--red);
+}
+
+.pill.connected{
+  color:#bbf7d0;
+  border-color:rgba(34,197,94,.35);
+}
+
+.pill.connected .dot{
+  background:var(--green);
+  box-shadow:0 0 10px var(--green);
+}
+
+/* CONTROLS */
+
+.controls{
+  display:grid;
+  grid-template-columns:
+    1.5fr
+    1fr
+    .8fr
+    .8fr
+    1fr;
+  gap:9px;
+  margin-bottom:12px;
+}
+
+.control{
+  border:1px solid var(--line);
+  background:var(--panel);
+  border-radius:12px;
+  padding:10px;
+}
+
+label,
+.label{
+  display:block;
+  color:var(--muted);
+  text-transform:uppercase;
+  font-size:9px;
+  letter-spacing:.7px;
+  font-weight:800;
+  margin-bottom:6px;
+}
+
+select,
+input{
+  width:100%;
+  color:var(--text);
+  background:#060d18;
+  border:1px solid #20334d;
+  border-radius:8px;
+  padding:9px;
+  outline:none;
+}
+
+select:focus,
+input:focus{
+  border-color:var(--blue);
+}
+
+/* MARKET */
+
+.market{
+  border:1px solid var(--line);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(59,130,246,.08),
+      transparent 60%
+    ),
+    var(--panel);
+  border-radius:16px;
+  padding:16px;
+  margin-bottom:12px;
+}
+
+.market-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:15px;
+}
+
+.market-name{
+  font-size:19px;
+  font-weight:900;
+}
+
+.market-meta{
+  color:var(--muted);
+  font-size:11px;
+  margin-top:4px;
+}
+
+.price{
+  font-size:31px;
+  font-weight:900;
+  text-align:right;
+}
+
+.last{
+  color:#60a5fa;
+  font-size:12px;
+  text-align:right;
+  font-weight:800;
+}
+
+/* BUTTONS */
+
+.actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:14px;
+}
+
+.btn{
+  border:1px solid var(--line);
+  color:var(--text);
+  background:#0c1728;
+  border-radius:8px;
+  padding:9px 12px;
+  font-size:11px;
+  font-weight:900;
+}
+
+.btn:hover{
+  border-color:#416486;
+}
+
+.btn.primary{
+  background:linear-gradient(
+    135deg,
+    #2563eb,
+    #4f46e5
+  );
+}
+
+.btn.green{
+  background:#14532d;
+  border-color:#166534;
+}
+
+.btn.red{
+  background:#5f1717;
+  border-color:#7f1d1d;
+}
+
+/* DIGIT STREAM */
+
+.stream-title{
+  margin-top:15px;
+  margin-bottom:7px;
+  color:var(--muted);
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.8px;
+  font-weight:900;
+}
+
+.digit-stream{
+  display:flex;
+  gap:4px;
+  overflow:hidden;
+}
+
+.stream-digit{
+  min-width:25px;
+  height:25px;
+  display:grid;
+  place-items:center;
+  border:1px solid #20334d;
+  background:#07101c;
+  border-radius:6px;
+  font-size:11px;
+  font-weight:900;
+}
+
+/* MAIN GRID */
+
+.dashboard{
+  display:grid;
+  grid-template-columns:
+    1.25fr
+    .75fr;
+  gap:12px;
+}
+
+.stack{
+  display:grid;
+  gap:12px;
+}
+
+.panel{
+  border:1px solid var(--line);
+  background:var(--panel);
+  border-radius:15px;
+  padding:14px;
+}
+
+.panel-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:12px;
+}
+
+.panel-title h2{
+  font-size:13px;
+}
+
+.panel-title span{
+  color:var(--muted);
+  font-size:9px;
+}
+
+/* SCORE */
+
+.score-grid{
+  display:grid;
+  grid-template-columns:
+    repeat(4,1fr);
+  gap:7px;
+}
+
+.metric{
+  border:1px solid #182a41;
+  background:#07101c;
+  border-radius:10px;
+  padding:10px;
+}
+
+.metric-label{
+  color:var(--muted);
+  font-size:9px;
+  text-transform:uppercase;
+}
+
+.metric-value{
+  font-size:18px;
+  font-weight:900;
+  margin-top:4px;
+}
+
+.green-text{
+  color:#4ade80;
+}
+
+.red-text{
+  color:#fb7185;
+}
+
+.yellow-text{
+  color:#facc15;
+}
+
+.blue-text{
+  color:#60a5fa;
+}
+
+.purple-text{
+  color:#c4b5fd;
+}
+
+/* PROGRESS */
+
+.progress{
+  height:8px;
+  background:#050b14;
+  border:1px solid #17273d;
+  border-radius:99px;
+  overflow:hidden;
+}
+
+.fill{
+  height:100%;
+  width:0%;
+  background:
+    linear-gradient(
+      90deg,
+      #2563eb,
+      #06b6d4
+    );
+  transition:width .35s;
+}
+
+.signal-fill{
+  background:
+    linear-gradient(
+      90deg,
+      #7c3aed,
+      #ec4899
+    );
+}
+
+/* SIGNAL */
+
+.signal-box{
+  margin-top:10px;
+  border:1px solid #253858;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(139,92,246,.09),
+      transparent
+    );
+  border-radius:11px;
+  padding:12px;
+}
+
+.signal-label{
+  color:#c4b5fd;
+  font-size:9px;
+  text-transform:uppercase;
+  font-weight:900;
+}
+
+.signal{
+  font-size:16px;
+  font-weight:900;
+  margin:4px 0 9px;
+}
+
+.signal-note{
+  color:var(--muted);
+  font-size:10px;
+  margin-top:7px;
+}
+
+/* DIGIT TABLE */
+
+.digit-grid{
+  display:grid;
+  grid-template-columns:
+    repeat(10,1fr);
+  gap:5px;
+}
+
+.digit-card{
+  border:1px solid #1b2b42;
+  background:#07101c;
+  border-radius:8px;
+  padding:8px 3px;
+  text-align:center;
+}
+
+.digit-number{
+  font-weight:900;
+  font-size:13px;
+}
+
+.digit-percent{
+  font-size:9px;
+  color:var(--muted);
+  margin-top:3px;
+}
+
+.digit-bar{
+  height:4px;
+  background:#111c2c;
+  margin-top:5px;
+  border-radius:99px;
+  overflow:hidden;
+}
+
+.digit-bar-fill{
+  height:100%;
+  width:0%;
+  background:#3b82f6;
+}
+
+.digit-card.hot{
+  border-color:#166534;
+  background:rgba(34,197,94,.08);
+}
+
+.digit-card.hot .digit-bar-fill{
+  background:#22c55e;
+}
+
+.digit-card.cold{
+  border-color:#7f1d1d;
+  background:rgba(239,68,68,.06);
+}
+
+.digit-card.cold .digit-bar-fill{
+  background:#ef4444;
+}
+
+/* HOT COLD */
+
+.hotcold{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.list-box{
+  border:1px solid #192b42;
+  background:#07101c;
+  border-radius:10px;
+  padding:10px;
+}
+
+.list-title{
+  font-size:9px;
+  text-transform:uppercase;
+  font-weight:900;
+  color:var(--muted);
+  margin-bottom:7px;
+}
+
+.list{
+  display:flex;
+  gap:5px;
+  flex-wrap:wrap;
+}
+
+.badge{
+  padding:5px 7px;
+  border-radius:6px;
+  font-size:10px;
+  font-weight:900;
+  border:1px solid #20334d;
+}
+
+/* STREAKS */
+
+.streak-grid{
+  display:grid;
+  grid-template-columns:
+    repeat(3,1fr);
+  gap:7px;
+}
+
+.streak{
+  border:1px solid #192b42;
+  background:#07101c;
+  border-radius:9px;
+  padding:9px;
+}
+
+.streak-name{
+  color:var(--muted);
+  font-size:9px;
+  text-transform:uppercase;
+}
+
+.streak-value{
+  font-size:18px;
+  font-weight:900;
+  margin-top:3px;
+}
+
+/* MATRIX */
+
+.matrix-wrap{
+  overflow:auto;
+}
+
+.matrix{
+  border-collapse:collapse;
+  width:100%;
+  min-width:520px;
+  font-size:9px;
+}
+
+.matrix th,
+.matrix td{
+  border:1px solid #1a2b42;
+  text-align:center;
+  padding:6px;
+}
+
+.matrix th{
+  background:#0d192a;
+  color:#9fb2cc;
+}
+
+.matrix td{
+  font-weight:800;
+}
+
+/* CHART */
+
+.chart{
+  height:240px;
+  position:relative;
+}
+
+/* ANALYSIS TEXT */
+
+.insights{
+  display:grid;
+  gap:6px;
+}
+
+.insight{
+  border-left:3px solid #315b91;
+  background:#07101c;
+  padding:8px 10px;
+  border-radius:0 7px 7px 0;
+  font-size:10px;
+  color:#b8c8dc;
+}
+
+/* SETTINGS */
+
+.settings{
+  display:grid;
+  grid-template-columns:
+    repeat(4,1fr);
+  gap:8px;
+}
+
+/* LOG */
+
+.log{
+  height:160px;
+  overflow:auto;
+  background:#030811;
+  border:1px solid #17273d;
+  border-radius:8px;
+  padding:8px;
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+  font-size:9px;
+  color:#8fa5c0;
+}
+
+.log-line{
+  padding:2px 0;
+}
+
+.log-ok{
+  color:#86efac;
+}
+
+.log-error{
+  color:#fca5a5;
+}
+
+.footer{
+  text-align:center;
+  color:#53657d;
+  font-size:9px;
+  margin-top:15px;
+}
+
+/* MOBILE */
+
+@media(max-width:1050px){
+
+  .dashboard{
+    grid-template-columns:1fr;
+  }
+
+}
+
+@media(max-width:800px){
+
+  .controls{
+    grid-template-columns:
+      repeat(2,1fr);
+  }
+
+  .score-grid{
+    grid-template-columns:
+      repeat(2,1fr);
+  }
+
+  .settings{
+    grid-template-columns:
+      repeat(2,1fr);
+  }
+
+}
+
+@media(max-width:560px){
+
+  .app{
+    width:100%;
+    margin:0;
+  }
+
+  .header,
+  .market,
+  .panel{
+    border-radius:0;
+  }
+
+  .header-row{
+    align-items:flex-start;
+  }
+
+  .statuses{
+    justify-content:flex-end;
+  }
+
+  .controls{
+    grid-template-columns:1fr;
+    padding:8px;
+    margin:0;
+  }
+
+  .control{
+    padding:9px;
+  }
+
+  .market{
+    margin:8px 0;
+  }
+
+  .market-top{
+    flex-direction:column;
+  }
+
+  .price{
+    text-align:left;
+    font-size:27px;
+  }
+
+  .last{
+    text-align:left;
+  }
+
+  .actions{
+    display:grid;
+    grid-template-columns:
+      repeat(2,1fr);
+  }
+
+  .actions .btn{
+    width:100%;
+  }
+
+  .digit-grid{
+    grid-template-columns:
+      repeat(5,1fr);
+  }
+
+  .streak-grid{
+    grid-template-columns:
+      repeat(2,1fr);
+  }
+
+  .settings{
+    grid-template-columns:1fr;
+  }
+
+  .hotcold{
+    grid-template-columns:1fr;
+  }
+
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header class="header">
+
+  <div class="header-row">
+
+    <div class="brand">
+
+      <div class="logo">⚡</div>
+
+      <div>
+        <h1>DERIV PRO TERMINAL</h1>
+
+        <div class="subtitle">
+          ADVANCED DIGIT ANALYSIS • MARKET DATA ONLY • NO AUTOMATIC TRADING
+        </div>
+      </div>
+
+    </div>
+
+    <div class="statuses">
+
+      <div class="pill" id="connection">
+        <span class="dot"></span>
+        <span id="connectionText">
+          Connecting
+        </span>
+      </div>
+
+      <button
+        class="btn red"
+        id="disconnect"
+      >
+        Disconnect
+      </button>
+
+    </div>
+
+  </div>
+
+</header>
+
+
+<!-- CONTROLS -->
+
+<section class="controls">
+
+  <div class="control">
+
+    <label>Market</label>
+
+    <select id="market">
+      <option>Loading...</option>
+    </select>
+
+  </div>
+
+
+  <div class="control">
+
+    <label>Contract</label>
+
+    <select id="contract">
+
+      <option value="OVER">
+        OVER
+      </option>
+
+      <option value="UNDER">
+        UNDER
+      </option>
+
+      <option value="MATCH">
+        MATCH
+      </option>
+
+      <option value="DIFF">
+        DIFFERENT
+      </option>
+
+      <option value="EVEN">
+        EVEN
+      </option>
+
+      <option value="ODD">
+        ODD
+      </option>
+
+    </select>
+
+  </div>
+
+
+  <div class="control">
+
+    <label>Sample</label>
+
+    <select id="sample">
+
+      <option value="100">
+        100
+      </option>
+
+      <option value="300">
+        300
+      </option>
+
+      <option value="500" selected>
+        500
+      </option>
+
+      <option value="1000">
+        1000
+      </option>
+
+      <option value="2000">
+        2000
+      </option>
+
+    </select>
+
+  </div>
+
+
+  <div class="control">
+
+    <label>Barrier</label>
+
+    <input
+      id="barrier"
+      type="number"
+      min="0"
+      max="9"
+      value="5"
+    >
+
+  </div>
+
+
+  <div class="control">
+
+    <label>Analysis Mode</label>
+
+    <select id="mode">
+
+      <option value="balanced">
+        Balanced
+      </option>
+
+      <option value="recent">
+        Recent Momentum
+      </option>
+
+      <option value="deep">
+        Deep Pattern
+      </option>
+
+    </select>
+
+  </div>
+
+</section>
+
+
+<!-- MARKET -->
+
+<section class="market">
+
+  <div class="market-top">
+
+    <div>
+
+      <div
+        class="market-name"
+        id="marketName"
+      >
+        Waiting...
+      </div>
+
+      <div
+        class="market-meta"
+        id="marketMeta"
+      >
+        Connecting to public market data
+      </div>
+
+    </div>
+
+
+    <div>
+
+      <div
+        class="price"
+        id="price"
+      >
+        --
+      </div>
+
+      <div class="last">
+        LAST DIGIT:
+        <span id="lastDigit">-</span>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="actions">
+
+    <button
+      class="btn primary"
+      id="analyze"
+    >
+      ⚡ Analyze
+    </button>
+
+    <button
+      class="btn"
+      id="refresh"
+    >
+      ↻ Refresh Data
+    </button>
+
+    <button
+      class="btn"
+      id="overBtn"
+    >
+      OVER Scan
+    </button>
+
+    <button
+      class="btn"
+      id="underBtn"
+    >
+      UNDER Scan
+    </button>
+
+    <button
+      class="btn"
+      id="evenBtn"
+    >
+      EVEN Scan
+    </button>
+
+    <button
+      class="btn"
+      id="oddBtn"
+    >
+      ODD Scan
+    </button>
+
+  </div>
+
+
+  <div class="stream-title">
+    Live Digit Stream
+  </div>
+
+  <div
+    class="digit-stream"
+    id="digitStream"
+  ></div>
+
+</section>
+
+
+<!-- DASHBOARD -->
+
+<div class="dashboard">
+
+
+<!-- LEFT -->
+
+<div class="stack">
+
+
+<section class="panel">
+
+  <div class="panel-title">
+
+    <h2>⚡ Signal Engine</h2>
+
+    <span>
+      MULTI-WINDOW ANALYSIS
+    </span>
+
+  </div>
+
+
+  <div class="score-grid">
+
+    <div class="metric">
+      <div class="metric-label">
+        Technical Score
+      </div>
+      <div
+        class="metric-value purple-text"
+        id="score"
+      >
+        0%
+      </div>
+    </div>
+
+
+    <div class="metric">
+      <div class="metric-label">
+        Observed Rate
+      </div>
+      <div
+        class="metric-value blue-text"
+        id="rate"
+      >
+        0%
+      </div>
+    </div>
+
+
+    <div class="metric">
+      <div class="metric-label">
+        Consistency
+      </div>
+      <div
+        class="metric-value green-text"
+        id="consistency"
+      >
+        0%
+      </div>
+    </div>
+
+
+    <div class="metric">
+      <div class="metric-label">
+        Entropy
+      </div>
+      <div
+        class="metric-value yellow-text"
+        id="entropy"
+      >
+        0
+      </div>
+    </div>
+
+  </div>
+
+
+  <div
+    style="
+      margin-top:12px;
+      display:grid;
+      gap:6px;
+    "
+  >
+
+    <div class="label">
+      Technical Signal
+    </div>
+
+    <div class="progress">
+      <div
+        class="fill signal-fill"
+        id="scoreFill"
+      ></div>
+    </div>
+
+  </div>
+
+
+  <div class="signal-box">
+
+    <div class="signal-label">
+      Current Analysis
+    </div>
+
+    <div
+      class="signal"
+      id="signal"
+    >
+      Waiting for data...
+    </div>
+
+    <div
+      class="signal-note"
+      id="signalNote"
+    >
+      Statistical observations only.
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- DIGITS -->
+
+<section class="panel">
+
+  <div class="panel-title">
+
+    <h2>🔥 Hot / Cold Digits</h2>
+
+    <span>
+      EXPECTED BASELINE = 10%
+    </span>
+
+  </div>
+
+
+  <div
+    class="digit-grid"
+    id="digitGrid"
+  ></div>
+
+
+  <div
+    class="hotcold"
+    style="margin-top:10px;"
+  >
+
+    <div class="list-box">
+
+      <div class="list-title">
+        Hot Digits
+      </div>
+
+      <div
+        class="list"
+        id="hotList"
+      ></div>
+
+    </div>
+
+
+    <div class="list-box">
+
+      <div class="list-title">
+        Cold Digits
+      </div>
+
+      <div
+        class="list"
+        id="coldList"
+      ></div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- STREAKS -->
+
+<section class="panel">
+
+  <div class="panel-title">
+
+    <h2>🔥 Streak Engine</h2>
+
+    <span>
+      CURRENT / LONGEST
+    </span>
+
+  </div>
+
+
+  <div class="streak-grid">
+
+    <div class="streak">
+      <div class="streak-name">
+        Digit
+      </div>
+      <div
+        class="streak-value"
+        id="digitStreak"
+      >
+        -
+      </div>
+    </div>
+
+
+    <div class="streak">
+      <div class="streak-name">
+        Even / Odd
+      </div>
+      <div
+        class="streak-value"
+        id="parityStreak"
+      >
+        -
+      </div>
+    </div>
+
+
+    <div class="streak">
+      <div class="streak-name">
+        Over / Under
+      </div>
+      <div
+        class="streak-value"
+        id="ouStreak"
+      >
+        -
+      </div>
+    </div>
+
+
+    <div class="streak">
+      <div class="streak-name">
+        Repeats
+      </div>
+      <div
+        class="streak-value"
+        id="repeatStreak"
+      >
+        -
+      </div>
+    </div>
+
+
+    <div class="streak">
+      <div class="streak-name">
+        Alternation
+      </div>
+      <div
+        class="streak-value"
+        id="alternation"
+      >
+        -
+      </div>
+    </div>
+
+
+    <div class="streak">
+      <div class="streak-name">
+        Momentum
+      </div>
+      <div
+        class="streak-value"
+        id="momentum"
+      >
+        -
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- TRANSITION MATRIX -->
+
+<section class="panel">
+
+  <div class="panel-title">
+
+    <h2>🔬 Digit Transition Matrix</h2>
+
+    <span>
+      P(NEXT DIGIT | CURRENT DIGIT)
+    </span>
+
+  </div>
+
+
+  <div class="matrix-wrap">
+
+    <table class="matrix">
+
+      <thead>
+
+        <tr>
+          <th>FROM \ TO</th>
+          <th>0</th>
+          <th>1</th>
+          <th>2</th>
+          <th>3</th>
+          <th>4</th>
+          <th>5</th>
+          <th>6</th>
+          <th>7</th>
+          <th>8</th>
+          <th>9</th>
+        </tr>
+
+      </thead>
+
+      <tbody id="matrixBody"></tbody>
+
+    </table>
+
+  </div>
+
+</section>
+
+</div>
+
+
+<!-- RIGHT -->
+
+<div class="stack">
+
+
+<section class="panel">
+
+  <div class="panel-title">
+
+    <h2>📊 Frequency Distribution</h2>
+
+    <span>
+      LIVE
+    </span>
+
+  </div>
+
+  <div class="chart">
+    <canvas id="frequencyChart"></canvas>
+  </div>
+
+</section>
+
+
+<section class="panel">
+
+  <div class="panel-title">
+
+    <h2>📈 Rolling Momentum</h2>
+
+    <span>
+      RECENT 100
+    </span>
+
+  </div>
+
+  <div class="chart">
+    <canvas id="momentumChart"></canvas>
+  </div>
+
+</section>
+
+
+<section class="panel">
+
+  <div class="panel-title">
+
+    <h2>🧠 Pattern Detection</h2>
+
+    <span>
+      MULTI-WINDOW
+    </span>
+
+  </div>
+
+
+  <div
+    class="insights"
+    id="insights"
+  >
+
+    <div class="insight">
+      Waiting for sufficient tick history.
+    </div>
+
+  </div>
+
+</section>
+
+
+<section class="panel">
+
+  <div class="panel-title">
+
+    <h2>⚙ Terminal Settings</h2>
+
+  </div>
+
+
+  <div class="settings">
+
+    <div>
+      <label>Minimum Ticks</label>
+
+      <input
+        id="minimum"
+        type="number"
+        value="100"
+        min="20"
+        max="2000"
+      >
+    </div>
+
+
+    <div>
+      <label>Signal Threshold</label>
+
+      <input
+        id="threshold"
+        type="number"
+        value="65"
+        min="50"
+        max="95"
+      >
+    </div>
+
+
+    <div>
+      <label>Auto Analysis</label>
+
+      <select id="auto">
+
+        <option value="off">
+          OFF
+        </option>
+
+        <option value="on">
+          ON — 10 sec
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <div>
+      <label>Stream Size</label>
+
+      <select id="streamSize">
+
+        <option value="30">
+          30
+        </option>
+
+        <option value="50" selected>
+          50
+        </option>
+
+        <option value="100">
+          100
+        </option>
+
+      </select>
+
+    </div>
+
+  </div>
